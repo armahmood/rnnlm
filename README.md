@@ -1,10 +1,10 @@
 
-## Mac OS X version
-converted exp10(x) to pow((double)10, x)
+####Mac OS X version:
+converted `exp10(x)` to `pow((double)10, x)`
 
-from http://www.rnnlm.org/
 
 # RNNLM Toolkit
+from http://www.rnnlm.org/
 
 by Tomas Mikolov, 2010-2012
 ## Introduction
