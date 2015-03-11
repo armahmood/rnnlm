@@ -1,4 +1,4 @@
-CC = x86_64-linux-g++-4.6
+CC = g++
 WEIGHTTYPE = float
 CFLAGS = -D WEIGHTTYPE=$(WEIGHTTYPE) -lm -O2 -Wall -funroll-loops -ffast-math
 #CFLAGS = -lm -O2 -Wall

@@ -22,27 +22,27 @@ using namespace std;
 int argPos(char *str, int argc, char **argv)
 {
     int a;
-    
+
     for (a=1; a<argc; a++) if (!strcmp(str, argv[a])) return a;
-    
+
     return -1;
 }
 
 int main(int argc, char **argv)
 {
     int i;
-    
+
     int debug_mode=1;
-    
+
     int fileformat=TEXT;
-    
+
     int train_mode=0;
     int valid_data_set=0;
     int test_data_set=0;
     int rnnlm_file_set=0;
-    
+
     int alpha_set=0, train_file_set=0;
-    
+
     int class_size=100;
     int old_classes=0;
     float lambda=0.75;
@@ -65,15 +65,15 @@ int main(int argc, char **argv)
     int one_iter=0;
     int maxIter=INT_MAX;
     int anti_k=0;
-    
+
     char train_file[MAX_STRING];
     char valid_file[MAX_STRING];
     char test_file[MAX_STRING];
     char rnnlm_file[MAX_STRING];
     char lmprob_file[MAX_STRING];
-    
+
     FILE *f;
-    
+
     if (argc==1) {
     	//printf("Help\n");
 
@@ -83,19 +83,19 @@ int main(int argc, char **argv)
 
     	//
     	printf("Parameters for training phase:\n");
-    	
+
     	printf("\t-train <file>\n");
         printf("\t\tUse text data from <file> to train rnnlm model\n");
-        
+
         printf("\t-class <int>\n");
         printf("\t\tWill use specified amount of classes to decompose vocabulary; default is 100\n");
-	
+
 	printf("\t-old-classes\n");
         printf("\t\tThis will use old algorithm to compute classes, which results in slower models but can be a bit more precise\n");
 
     	printf("\t-rnnlm <file>\n");
         printf("\t\tUse <file> to store rnnlm model\n");
-        
+
         printf("\t-binary\n");
         printf("\t\tRnnlm model will be saved in binary format (default is plain text)\n");
 
@@ -104,37 +104,37 @@ int main(int argc, char **argv)
 
     	printf("\t-alpha <float>\n");
     	printf("\t\tSet starting learning rate; default is 0.1\n");
-    	
+
     	printf("\t-beta <float>\n");
     	printf("\t\tSet L2 regularization parameter; default is 1e-7\n");
 
     	printf("\t-hidden <int>\n");
     	printf("\t\tSet size of hidden layer; default is 30\n");
-    	
+
     	printf("\t-compression <int>\n");
     	printf("\t\tSet size of compression layer; default is 0 (not used)\n");
-    	
+
     	printf("\t-direct <int>\n");
     	printf("\t\tSets size of the hash for direct connections with n-gram features in millions; default is 0\n");
-    	
+
     	printf("\t-direct-order <int>\n");
     	printf("\t\tSets the n-gram order for direct connections (max %d); default is 3\n", MAX_NGRAM_ORDER);
-    	
+
     	printf("\t-bptt <int>\n");
     	printf("\t\tSet amount of steps to propagate error back in time; default is 0 (equal to simple RNN)\n");
-    	
+
     	printf("\t-bptt-block <int>\n");
     	printf("\t\tSpecifies amount of time steps after which the error is backpropagated through time in block mode (default 10, update at each time step = 1)\n");
-    	
+
     	printf("\t-one-iter\n");
     	printf("\t\tWill cause training to perform exactly one iteration over training data (useful for adapting final models on different data etc.)\n");
 
     	printf("\t-max-iter\n");
     	printf("\t\tWill cause training to perform exactly <max-iter> iterations over training data (useful to test static learning rates if min-improvement is set to 0.0)\n");
-    	
+
     	printf("\t-anti-kasparek <int>\n");
     	printf("\t\tModel will be saved during training after processing specified amount of words\n");
-    	
+
     	printf("\t-min-improvement <float>\n");
     	printf("\t\tSet minimal relative entropy improvement for training convergence; default is 1.003\n");
 
@@ -156,17 +156,17 @@ int main(int argc, char **argv)
 
     	printf("\t-lambda <float>\n");
     	printf("\t\tSet parameter for linear interpolation of rnnlm and other lm; default weight of rnnlm is 0.75\n");
-    	
+
     	printf("\t-dynamic <float>\n");
     	printf("\t\tSet learning rate for dynamic model updates during testing phase; default is 0 (static model)\n");
-    	
+
     	//
 
     	printf("Additional parameters:\n");
-    	
+
     	printf("\t-gen <int>\n");
     	printf("\t\tGenerate specified amount of words given distribution from current model\n");
-    	
+
     	printf("\t-independent\n");
     	printf("\t\tWill erase history at end of each sentence (if used for training, this switch should be used also for testing & rescoring)\n");
 
@@ -178,7 +178,7 @@ int main(int argc, char **argv)
     	return 0;	//***
     }
 
-    
+
     //set debug mode
     i=argPos((char *)"-debug", argc, argv);
     if (i>0) {
@@ -193,7 +193,7 @@ int main(int argc, char **argv)
         printf("debug mode: %d\n", debug_mode);
     }
 
-    
+
     //search for train file
     i=argPos((char *)"-train", argc, argv);
     if (i>0) {
@@ -214,11 +214,11 @@ int main(int argc, char **argv)
         }
 
         train_mode=1;
-        
+
         train_file_set=1;
     }
-    
-    
+
+
     //set one-iter
     i=argPos((char *)"-one-iter", argc, argv);
     if (i>0) {
@@ -242,8 +242,8 @@ int main(int argc, char **argv)
         if (debug_mode>0)
         printf("Maximum number of iterations: %d\n", maxIter);
     }
-    
-    
+
+
     //search for validation file
     i=argPos((char *)"-valid", argc, argv);
     if (i>0) {
@@ -265,15 +265,15 @@ int main(int argc, char **argv)
 
         valid_data_set=1;
     }
-    
+
     if (train_mode && !valid_data_set) {
 	if (one_iter==0) {
 	    printf("ERROR: validation data file must be specified for training!\n");
     	    return 0;
     	}
     }
-    
-    
+
+
     //set nbest rescoring mode
     i=argPos((char *)"-nbest", argc, argv);
     if (i>0) {
@@ -281,8 +281,8 @@ int main(int argc, char **argv)
         if (debug_mode>0)
         printf("Processing test data as list of nbests\n");
     }
-    
-    
+
+
     //search for test file
     i=argPos((char *)"-test", argc, argv);
     if (i>0) {
@@ -296,7 +296,7 @@ int main(int argc, char **argv)
         if (debug_mode>0)
         printf("test file: %s\n", test_file);
 
-	
+
 	if (nbest && (!strcmp(test_file, "-"))) ; else {
             f=fopen(test_file, "rb");
             if (f==NULL) {
@@ -307,8 +307,8 @@ int main(int argc, char **argv)
 
         test_data_set=1;
     }
-    
-    
+
+
     //set class size parameter
     i=argPos((char *)"-class", argc, argv);
     if (i>0) {
@@ -332,8 +332,8 @@ int main(int argc, char **argv)
 	if (debug_mode>0)
         printf("Old algorithm for computing classes will be used\n");
     }
-    
-    
+
+
     //set lambda
     i=argPos((char *)"-lambda", argc, argv);
     if (i>0) {
@@ -347,8 +347,8 @@ int main(int argc, char **argv)
         if (debug_mode>0)
         printf("Lambda (interpolation coefficient between rnnlm and other lm): %f\n", lambda);
     }
-    
-    
+
+
     //set gradient cutoff
     i=argPos((char *)"-gradient-cutoff", argc, argv);
     if (i>0) {
@@ -362,8 +362,8 @@ int main(int argc, char **argv)
         if (debug_mode>0)
         printf("Gradient cutoff: %f\n", gradient_cutoff);
     }
-    
-    
+
+
     //set dynamic
     i=argPos((char *)"-dynamic", argc, argv);
     if (i>0) {
@@ -377,8 +377,8 @@ int main(int argc, char **argv)
         if (debug_mode>0)
         printf("Dynamic learning rate: %f\n", dynamic);
     }
-    
-    
+
+
     //set gen
     i=argPos((char *)"-gen", argc, argv);
     if (i>0) {
@@ -392,8 +392,8 @@ int main(int argc, char **argv)
         if (debug_mode>0)
         printf("Generating # words: %d\n", gen);
     }
-    
-    
+
+
     //set independent
     i=argPos((char *)"-independent", argc, argv);
     if (i>0) {
@@ -402,8 +402,8 @@ int main(int argc, char **argv)
         if (debug_mode>0)
         printf("Sentences will be processed independently...\n");
     }
-    
-    
+
+
     //set learning rate
     i=argPos((char *)"-alpha", argc, argv);
     if (i>0) {
@@ -418,8 +418,8 @@ int main(int argc, char **argv)
         printf("Starting learning rate: %f\n", starting_alpha);
         alpha_set=1;
     }
-    
-    
+
+
     //set regularization
     i=argPos((char *)"-beta", argc, argv);
     if (i>0) {
@@ -433,8 +433,8 @@ int main(int argc, char **argv)
         if (debug_mode>0)
         printf("Regularization: %f\n", regularization);
     }
-    
-    
+
+
     //set min improvement
     i=argPos((char *)"-min-improvement", argc, argv);
     if (i>0) {
@@ -448,8 +448,8 @@ int main(int argc, char **argv)
         if (debug_mode>0)
         printf("Min improvement: %f\n", min_improvement);
     }
-    
-    
+
+
     //set anti kasparek
     i=argPos((char *)"-anti-kasparek", argc, argv);
     if (i>0) {
@@ -459,13 +459,13 @@ int main(int argc, char **argv)
         }
 
         anti_k=atoi(argv[i+1]);
-        
+
         if ((anti_k!=0) && (anti_k<10000)) anti_k=10000;
 
         if (debug_mode>0)
         printf("Model will be saved after each # words: %d\n", anti_k);
     }
-    
+
 
     //set hidden layer size
     i=argPos((char *)"-hidden", argc, argv);
@@ -480,8 +480,8 @@ int main(int argc, char **argv)
         if (debug_mode>0)
         printf("Hidden layer size: %d\n", hidden_size);
     }
-    
-    
+
+
     //set compression layer size
     i=argPos((char *)"-compression", argc, argv);
     if (i>0) {
@@ -495,8 +495,8 @@ int main(int argc, char **argv)
         if (debug_mode>0)
         printf("Compression layer size: %d\n", compression_size);
     }
-    
-    
+
+
     //set direct connections
     i=argPos((char *)"-direct", argc, argv);
     if (i>0) {
@@ -506,15 +506,15 @@ int main(int argc, char **argv)
         }
 
         direct=atoi(argv[i+1]);
-        
+
         direct*=1000000;
 	if (direct<0) direct=0;
 
         if (debug_mode>0)
         printf("Direct connections: %dM\n", (int)(direct/1000000));
     }
-    
-    
+
+
     //set order of direct connections
     i=argPos((char *)"-direct-order", argc, argv);
     if (i>0) {
@@ -529,8 +529,8 @@ int main(int argc, char **argv)
         if (debug_mode>0)
         printf("Order of direct connections: %d\n", direct_order);
     }
-    
-    
+
+
     //set bptt
     i=argPos((char *)"-bptt", argc, argv);
     if (i>0) {
@@ -546,8 +546,8 @@ int main(int argc, char **argv)
         if (debug_mode>0)
         printf("BPTT: %d\n", bptt-1);
     }
-    
-    
+
+
     //set bptt block
     i=argPos((char *)"-bptt-block", argc, argv);
     if (i>0) {
@@ -562,8 +562,8 @@ int main(int argc, char **argv)
         if (debug_mode>0)
         printf("BPTT block: %d\n", bptt_block);
     }
-    
-        
+
+
     //set random seed
     i=argPos((char *)"-rand-seed", argc, argv);
     if (i>0) {
@@ -577,8 +577,8 @@ int main(int argc, char **argv)
         if (debug_mode>0)
         printf("Rand seed: %d\n", rand_seed);
     }
-    
-    
+
+
     //use other lm
     i=argPos((char *)"-lm-prob", argc, argv);
     if (i>0) {
@@ -597,11 +597,11 @@ int main(int argc, char **argv)
             printf("ERROR: other lm file not found!\n");
             return 0;
         }
-    
+
         use_lmprob=1;
     }
-    
-    
+
+
     //search for binary option
     i=argPos((char *)"-binary", argc, argv);
     if (i>0) {
@@ -610,8 +610,8 @@ int main(int argc, char **argv)
 
         fileformat=BINARY;
     }
-    
-    
+
+
     //search for rnnlm file
     i=argPos((char *)"-rnnlm", argc, argv);
     if (i>0) {
@@ -645,8 +645,8 @@ int main(int argc, char **argv)
 	printf("ERROR: rnnlm file must be specified to generate words!\n");
     	return 0;
     }
-    
-    
+
+
     srand(1);
 
     if (train_mode) {
@@ -655,7 +655,7 @@ int main(int argc, char **argv)
     	model1.setTrainFile(train_file);
     	model1.setRnnLMFile(rnnlm_file);
     	model1.setFileType(fileformat);
-    	
+
     	model1.setOneIter(one_iter);
     	model1.setMaxIter(maxIter);
     	if (one_iter==0) model1.setValidFile(valid_file);
@@ -676,12 +676,12 @@ int main(int argc, char **argv)
     	model1.setDebugMode(debug_mode);
     	model1.setAntiKasparek(anti_k);
 	model1.setIndependent(independent);
-    	
+
     	model1.alpha_set=alpha_set;
     	model1.train_file_set=train_file_set;
     	model1.trainNet();
     }
-    
+
     if (test_data_set && rnnlm_file_set) {
         CRnnLM model1;
 
@@ -698,18 +698,18 @@ int main(int argc, char **argv)
 	if (nbest==0) model1.testNet();
 	else model1.testNbest();
     }
-    
+
     if (gen>0) {
 	CRnnLM model1;
-	
+
 	model1.setRnnLMFile(rnnlm_file);
 	model1.setDebugMode(debug_mode);
 	model1.setRandSeed(rand_seed);
 	model1.setGen(gen);
-    
+
 	model1.testGen();
     }
-    
-    
+
+
     return 0;
 }
